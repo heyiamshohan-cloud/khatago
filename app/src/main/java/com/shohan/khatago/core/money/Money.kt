@@ -32,7 +32,8 @@ object Money {
 
     /** Minor units -> exact decimal BDT (for exports, PDFs and reports). */
     fun toDecimal(minor: Long): BigDecimal =
-        BigDecimal.valueOf(minor).divide(BigDecimal.valueOf(MINOR_UNITS_PER_MAJOR))
+        BigDecimal.valueOf(minor)
+            .divide(BigDecimal.valueOf(MINOR_UNITS_PER_MAJOR), 2, RoundingMode.UNNECESSARY)
 
     /**
      * Parses user input such as `1250`, `1,250.75`, `৳ 1250.5` into minor units.

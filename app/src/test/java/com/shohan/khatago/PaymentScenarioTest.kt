@@ -134,7 +134,10 @@ class PaymentScenarioTest {
     @Test
     fun zeroValuesAreRejectedAsPaymentsButNeverBreakBalances() {
         assertThat(PaymentValidator.validate(0L, 1_000L)).isEqualTo(PaymentValidator.Check.Empty)
-        assertThat(PaymentValidator.validate(0L, 0L)).isEqualTo(PaymentValidator.Check.AlreadySettled)
+        // A blank amount is reported as an empty payment even when the account is
+        // settled: "Enter a valid amount." is the actionable message.
+        assertThat(PaymentValidator.validate(0L, 0L)).isEqualTo(PaymentValidator.Check.Empty)
+        assertThat(PaymentValidator.validate(1L, 0L)).isEqualTo(PaymentValidator.Check.AlreadySettled)
         assertThat(BalanceEngine.remaining(0L, 0L)).isEqualTo(0L)
         assertThat(BalanceEngine.paidPercent(0L, 0L)).isEqualTo(100)
         assertThat(Money.splitEvenly(0L, 3)).containsExactly(0L, 0L, 0L).inOrder()

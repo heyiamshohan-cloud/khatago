@@ -83,7 +83,8 @@ class TimeAndInsightTest {
         )
         assertThat(insights).isNotEmpty()
         assertThat(insights.first().id).isEqualTo("overdue")
-        assertThat(insights.first().message).contains("30,000")
+        // 30,000 minor units is BDT 300.00; the insight shows formatted money.
+        assertThat(insights.first().message).contains("৳300")
     }
 
     @Test

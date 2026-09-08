@@ -87,7 +87,10 @@ class FinancialEngineTest {
             totalAmount = 100_003L
         )
         assertThat(schedule.sumOf { it.amount }).isEqualTo(100_003L)
-        assertThat(schedule.first().amount).isEqualTo(14_286L)
+        // 100,003 paisa over 7 installments: the odd paisa goes to the earliest
+        // slots, so the schedule still sums back to the total exactly.
+        assertThat(schedule.first().amount).isEqualTo(14_287L)
+        assertThat(schedule.last().amount).isEqualTo(14_286L)
     }
 
     @Test

@@ -94,8 +94,10 @@ class MoneyTest {
     @Test
     fun safeArithmetic_clampsInsteadOfOverflowing() {
         assertThat(Money.safeAdd(Long.MAX_VALUE, 1L)).isEqualTo(Long.MAX_VALUE)
-        assertThat(Money.safeSubtract(0L, Long.MAX_VALUE)).isEqualTo(Long.MAX_VALUE)
+        assertThat(Money.safeAdd(Long.MIN_VALUE, -1L)).isEqualTo(Long.MIN_VALUE)
+        assertThat(Money.safeSubtract(Long.MIN_VALUE, 1L)).isEqualTo(Long.MIN_VALUE)
         assertThat(Money.safeMultiply(Long.MAX_VALUE, 2L)).isEqualTo(Long.MAX_VALUE)
+        assertThat(Money.safeMultiply(Long.MIN_VALUE, 2L)).isEqualTo(Long.MIN_VALUE)
     }
 
     @Test
