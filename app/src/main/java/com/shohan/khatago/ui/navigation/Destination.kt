@@ -37,6 +37,8 @@ object Destination {
     const val INCOME_FORM = "income_form?incomeId={incomeId}"
     const val EXPENSE_FORM = "expense_form?expenseId={expenseId}"
 
+    const val TRANSACTION_DETAIL = "transaction/{entryId}"
+
     const val ABOUT = "about"
     const val CATEGORIES = "categories"
     const val APP_LOCK = "app_lock"
@@ -69,6 +71,8 @@ object Destination {
         "repayment_form?debtId=$debtId" + (repaymentId?.let { "&repaymentId=$it" } ?: "")
     fun returnForm(lendingId: Long, returnId: Long? = null) =
         "return_form?lendingId=$lendingId" + (returnId?.let { "&returnId=$it" } ?: "")
+
+    fun transactionDetail(entryId: Long) = "transaction/$entryId"
 
     fun incomeForm(id: Long? = null) = if (id == null) "income_form?" else "income_form?incomeId=$id"
     fun expenseForm(id: Long? = null) = if (id == null) "expense_form?" else "expense_form?expenseId=$id"

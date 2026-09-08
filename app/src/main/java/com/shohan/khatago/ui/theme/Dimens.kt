@@ -47,8 +47,8 @@ object ElevationTokens {
 }
 
 object SizeTokens {
-    /** Minimum accessible touch target. */
-    val MinTouch = 48.dp
+    /** Minimum accessible touch target (above the 48dp platform guideline). */
+    val MinTouch = 52.dp
     val IconButton = 40.dp
     val Avatar = 36.dp
     val HeroCardMinHeight = 168.dp

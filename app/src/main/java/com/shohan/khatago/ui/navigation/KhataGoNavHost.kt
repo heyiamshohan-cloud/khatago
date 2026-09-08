@@ -38,6 +38,7 @@ import androidx.navigation.navArgument
 import com.shohan.khatago.core.KhataGoAppInfo
 import com.shohan.khatago.core.di.AppContainer
 import com.shohan.khatago.core.money.Money
+import com.shohan.khatago.core.time.KhataGoTime
 import com.shohan.khatago.core.result.Outcome
 import com.shohan.khatago.data.backup.BackupRepository
 import com.shohan.khatago.data.export.ExportFileNames
@@ -108,6 +109,8 @@ import com.shohan.khatago.ui.screens.shop.ShopPaymentFormViewModel
 import com.shohan.khatago.ui.screens.transactions.AddExpenseScreen
 import com.shohan.khatago.ui.screens.transactions.AddIncomeScreen
 import com.shohan.khatago.ui.screens.transactions.IncomeExpenseFormViewModel
+import com.shohan.khatago.ui.screens.transactions.TransactionDetailScreen
+import com.shohan.khatago.ui.screens.transactions.TransactionDetailViewModel
 import com.shohan.khatago.ui.screens.transactions.TransactionsScreen
 import com.shohan.khatago.ui.screens.transactions.TransactionsViewModel
 import com.shohan.khatago.ui.theme.CanvasWhite
@@ -266,7 +269,7 @@ fun KhataGoNavHost(
 
     fun openEntry(entry: LedgerEntry) {
         scope.launch {
-            val route = resolveEntryRoute(container, entry) ?: return@launch
+            val route = resolveEntryRoute(container, entry)
             navController.navigate(route)
         }
     }
@@ -1115,6 +1118,41 @@ fun KhataGoNavHost(
             )
         }
 
+        composable(
+            route = Destination.TRANSACTION_DETAIL,
+            arguments = listOf(requiredLong("entryId"))
+        ) { entry ->
+            val entryId = entry.longArg("entryId")
+            val vm: TransactionDetailViewModel = khataGoViewModel {
+                TransactionDetailViewModel(it.ledgerRepository, entryId)
+            }
+            val ledgerEntry by produceState<LedgerEntry?>(null, entryId) {
+                value = vm.load()
+            }
+            val current = ledgerEntry
+            if (current != null) {
+                TransactionDetailScreen(
+                    title = current.description.ifBlank { current.category },
+                    subtitle = current.type.label,
+                    amount = current.amount,
+                    amountIsIncome = current.type.countsAsIncome,
+                    rows = listOf(
+                        "Date" to KhataGoTime.formatDate(current.date),
+                        "Type" to current.type.label,
+                        "Category" to current.category,
+                        "Account" to current.relatedType.name,
+                        "Notes" to current.notes.ifBlank { "—" }
+                    ),
+                    canEdit = false,
+                    onBack = { navController.popBackStack() },
+                    onEdit = { },
+                    onDelete = { }
+                )
+            } else {
+                Box(modifier = Modifier.fillMaxSize())
+            }
+        }
+
         // ------------------------------------------------------------- settings
 
         composable(Destination.ABOUT) {
@@ -1218,7 +1256,7 @@ private fun NavBackStackEntry.optionalLongArg(name: String): Long? =
  * Income and expense open their own editor; anything written by another module
  * opens that module's record, so the user always lands somewhere they can act.
  */
-private suspend fun resolveEntryRoute(container: AppContainer, entry: LedgerEntry): String? =
+private suspend fun resolveEntryRoute(container: AppContainer, entry: LedgerEntry): String =
     when (entry.relatedType) {
         RelatedType.INCOME -> Destination.incomeForm(entry.relatedId)
         RelatedType.EXPENSE -> Destination.expenseForm(entry.relatedId)
@@ -1236,9 +1274,10 @@ private suspend fun resolveEntryRoute(container: AppContainer, entry: LedgerEntr
                     .first()
                     .firstOrNull { it.personId == entry.relatedId }
                     ?.let { Destination.lentDetail(it.id) }
+                    ?: Destination.transactionDetail(entry.id)
             }
         }
-        RelatedType.NONE -> null
+        RelatedType.NONE -> Destination.transactionDetail(entry.id)
     }
 
 /** The launch screen: quiet, brand-forward, and gone quickly. */

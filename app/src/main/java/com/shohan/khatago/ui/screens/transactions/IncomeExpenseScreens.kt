@@ -17,8 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shohan.khatago.core.money.Money
+import com.shohan.khatago.domain.model.LedgerEntry
 import com.shohan.khatago.core.result.Outcome
 import com.shohan.khatago.core.result.onFailure
 import com.shohan.khatago.data.local.db.entity.CategoryEntity
@@ -38,6 +40,7 @@ import com.shohan.khatago.ui.theme.Spacing
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -263,6 +266,21 @@ fun AddExpenseScreen(
 }
 
 // ------------------------------------------------------------------ detail
+
+/**
+ * Loads one ledger line by id. Used for entries whose parent record can no
+ * longer be resolved, so a tap on history always shows the user something real.
+ */
+class TransactionDetailViewModel(
+    private val repository: LedgerRepository,
+    private val entryId: Long
+) : ViewModel() {
+
+    suspend fun load(): LedgerEntry? = repository
+        .observeTransactionsBetween(0L, 10_000_000L, limit = 10_000)
+        .first()
+        .firstOrNull { it.id == entryId }
+}
 
 /**
  * Read-only detail for any ledger line, with edit and delete when the entry
