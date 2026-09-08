@@ -129,6 +129,38 @@ allprojects {
     }
 }
 
+// ---------------------------------------------------------------------------
+// TEMPORARY CI DIAGNOSTIC — remove before release.
+//
+// Reports the exception behind a failing lint task, which is invisible from the
+// sandbox because CI logs and artifacts cannot be downloaded.
+// ---------------------------------------------------------------------------
+gradle.taskGraph.addTaskExecutionListener(
+    object : org.gradle.api.execution.TaskExecutionListener {
+        override fun beforeExecute(task: org.gradle.api.Task) {
+        }
+
+        override fun afterExecute(task: org.gradle.api.Task, state: org.gradle.api.tasks.TaskState) {
+            try {
+                val failure = state.failure ?: return
+                if (!task.name.contains("lint", ignoreCase = true)) return
+                val text = StringBuilder()
+                var current: Throwable? = failure
+                var depth = 0
+                while (current != null && depth < 6) {
+                    text.append(current.javaClass.name)
+                        .append(": ")
+                        .append(current.message ?: "-")
+                        .append(" || ")
+                    current = current.cause
+                    depth = depth + 1
+                }
+                khataGoAnnotate("khataGo taskFail " + task.path + ": ", text.toString(), 900)
+            } catch (ignored: Throwable) {
+            }
+        }
+    }
+)
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

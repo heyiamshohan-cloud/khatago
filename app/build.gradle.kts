@@ -85,7 +85,6 @@ android {
         warningsAsErrors = false
         checkReleaseBuilds = true
         disable += setOf("GradleDependency", "OldTargetApi", "UnusedMaterial3ScaffoldPaddingParameter")
-        baseline = file("lint-baseline.xml")
     }
 
     ksp {
