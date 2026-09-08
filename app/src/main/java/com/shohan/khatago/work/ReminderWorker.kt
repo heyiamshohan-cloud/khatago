@@ -181,7 +181,14 @@ class ReminderWorker(
         singularTitle: String,
         suffix: String
     ) {
-        if (items.isEmpty()) return
+        if (items.isEmpty()) {
+            // Everything in this group was settled since the last scan: drop the
+            // stale notification instead of leaving a reminder that is no longer true.
+            runCatching {
+                NotificationManagerCompat.from(applicationContext).cancel(notificationId)
+            }
+            return
+        }
         val title = if (items.size == 1) {
             "${items.first().title} · $singularTitle"
         } else {

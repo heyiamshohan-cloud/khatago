@@ -696,8 +696,8 @@ private fun QuickActionsSection(
             QuickAction("Personal Debt", Icons.Outlined.Person) {
                 onQuickAction(AccountKind.PERSONAL_DEBT)
             },
-            QuickAction("Income", Icons.AutoMirrored.Outlined.TrendingUp, onAddIncome),
-            QuickAction("Expense", Icons.AutoMirrored.Outlined.TrendingDown, onAddExpense)
+            QuickAction("Income", Icons.Outlined.TrendingUp, onAddIncome),
+            QuickAction("Expense", Icons.Outlined.TrendingDown, onAddExpense)
         )
     }
 

@@ -1,5 +1,10 @@
 package com.shohan.khatago.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,6 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -46,6 +53,30 @@ fun KhataGoApp(container: AppContainer) {
             var unlocked by remember { mutableStateOf(false) }
             LaunchedEffect(settings.appLockEnabled) {
                 if (!settings.appLockEnabled) unlocked = false
+            }
+
+            // Android 13+ needs the notification permission granted at runtime.
+            // We ask once per app process, only when reminders are on and only
+            // after the user is past onboarding.
+            val context = LocalContext.current
+            var permissionRequested by remember { mutableStateOf(false) }
+            val requestPermission = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { permissionRequested = true }
+            LaunchedEffect(route, settings.remindersEnabled, permissionRequested) {
+                val pastOnboarding = route != null &&
+                    route != Destination.SPLASH &&
+                    route != Destination.ONBOARDING &&
+                    route != Destination.SETUP
+                if (pastOnboarding && settings.remindersEnabled && !permissionRequested &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    ContextCompat.checkSelfPermission(
+                        context, Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissionRequested = true
+                    requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
 
             val lockRequired = settings.appLockEnabled &&

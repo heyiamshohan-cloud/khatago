@@ -167,12 +167,12 @@ fun KhataGoTransactionRow(
 @Composable
 private fun iconFor(type: TransactionType): Triple<ImageVector, Color, Color> = when (type) {
     TransactionType.INCOME -> Triple(
-        Icons.AutoMirrored.Outlined.TrendingUp,
+        Icons.Outlined.TrendingUp,
         Positive,
         com.shohan.khatago.ui.theme.PositiveSoft
     )
     TransactionType.EXPENSE -> Triple(
-        Icons.AutoMirrored.Outlined.TrendingDown,
+        Icons.Outlined.TrendingDown,
         Negative,
         com.shohan.khatago.ui.theme.NegativeSoft
     )

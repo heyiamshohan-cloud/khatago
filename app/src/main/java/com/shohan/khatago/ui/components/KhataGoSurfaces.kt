@@ -109,7 +109,7 @@ fun KhataGoEmptyState(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.AutoMirrored.Outlined.ShowChart,
+    icon: ImageVector = Icons.Outlined.ShowChart,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null
 ) {
