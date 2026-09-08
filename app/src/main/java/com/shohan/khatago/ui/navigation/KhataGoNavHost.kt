@@ -340,7 +340,7 @@ fun KhataGoNavHost(
 
         composable(Destination.DASHBOARD) {
             val vm: DashboardViewModel = khataGoViewModel { DashboardViewModel(it.dashboardRepository) }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             DashboardScreen(
                 uiState = state,
                 onSearch = { navController.navigate(Destination.SEARCH) },
@@ -375,7 +375,7 @@ fun KhataGoNavHost(
                     it.todayProvider
                 )
             }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             AccountsScreen(
                 uiState = state,
                 onSelectTab = vm::selectTab,
@@ -394,7 +394,7 @@ fun KhataGoNavHost(
 
         composable(Destination.TRANSACTIONS) {
             val vm: TransactionsViewModel = khataGoViewModel { TransactionsViewModel(it.ledgerRepository) }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             TransactionsScreen(
                 uiState = state,
                 onSelectFilter = vm::selectFilter,
@@ -407,7 +407,7 @@ fun KhataGoNavHost(
 
         composable(Destination.REPORTS) {
             val vm: ReportsViewModel = khataGoViewModel { ReportsViewModel(it.reportsRepository) }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             ReportsScreen(
                 uiState = state,
                 onSelectRange = vm::selectRange,
@@ -421,7 +421,7 @@ fun KhataGoNavHost(
 
         composable(Destination.SETTINGS) {
             val vm: SettingsViewModel = khataGoViewModel { SettingsViewModel(it.settingsRepository) }
-            val settings by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.settings)
+            val settings by vm.settings.collectAsStateWithLifecycle()
             SettingsScreen(
                 settings = settings,
                 onBackup = { navController.navigate(Destination.BACKUP) },
@@ -444,7 +444,7 @@ fun KhataGoNavHost(
 
         composable(Destination.SEARCH) {
             val vm: SearchViewModel = khataGoViewModel { SearchViewModel(it.searchRepository) }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             SearchScreen(
                 uiState = state,
                 onQueryChange = vm::setQuery,
@@ -473,7 +473,7 @@ fun KhataGoNavHost(
 
         composable(Destination.UPCOMING) {
             val vm: DueListViewModel = khataGoViewModel { DueListViewModel(it.dashboardRepository, DueListKind.UPCOMING) }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             DueListScreen(
                 kind = DueListKind.UPCOMING,
                 items = state.items,
@@ -488,7 +488,7 @@ fun KhataGoNavHost(
                             subtitle = "",
                             dueDate = LocalDate.now(),
                             remaining = 0L,
-                            dueState = DueState.UPCOMING
+                            dueState = DueState.SCHEDULED
                         )
                     ) { navController.navigate(it) }
                 }
@@ -497,7 +497,7 @@ fun KhataGoNavHost(
 
         composable(Destination.OVERDUE) {
             val vm: DueListViewModel = khataGoViewModel { DueListViewModel(it.dashboardRepository, DueListKind.OVERDUE) }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             DueListScreen(
                 kind = DueListKind.OVERDUE,
                 items = state.items,
@@ -527,7 +527,7 @@ fun KhataGoNavHost(
         ) { entry ->
             val shopId = entry.longArg("shopId")
             val vm: ShopDetailViewModel = khataGoViewModel { ShopDetailViewModel(it.shopRepository, shopId) }
-            val ledger by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.ledger)
+            val ledger by vm.ledger.collectAsStateWithLifecycle()
             ShopDetailScreen(
                 ledger = ledger,
                 onBack = { navController.popBackStack() },
@@ -550,7 +550,7 @@ fun KhataGoNavHost(
         ) { entry ->
             val shopId = entry.optionalLongArg("shopId")
             val vm: ShopFormViewModel = khataGoViewModel { ShopFormViewModel(it.shopRepository, shopId) }
-            val shop by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.shop)
+            val shop by vm.shop.collectAsStateWithLifecycle()
             ShopFormScreen(
                 shop = shop,
                 isEdit = shopId != null,
@@ -670,7 +670,7 @@ fun KhataGoNavHost(
             val vm: LoanDetailViewModel = khataGoViewModel {
                 LoanDetailViewModel(it.loanRepository, it.todayProvider, loanId)
             }
-            val detail by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.detail)
+            val detail by vm.detail.collectAsStateWithLifecycle()
             LoanDetailScreen(
                 detail = detail,
                 onBack = { navController.popBackStack() },
@@ -688,7 +688,7 @@ fun KhataGoNavHost(
         ) { entry ->
             val loanId = entry.optionalLongArg("loanId")
             val vm: LoanFormViewModel = khataGoViewModel { LoanFormViewModel(it.loanRepository, loanId) }
-            val loan by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.loan)
+            val loan by vm.loan.collectAsStateWithLifecycle()
             LoanFormScreen(
                 loan = loan,
                 isEdit = loanId != null,
@@ -761,7 +761,7 @@ fun KhataGoNavHost(
             val vm: EmiDetailViewModel = khataGoViewModel {
                 EmiDetailViewModel(it.emiRepository, it.todayProvider, emiId)
             }
-            val detail by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.detail)
+            val detail by vm.detail.collectAsStateWithLifecycle()
             EmiDetailScreen(
                 detail = detail,
                 onBack = { navController.popBackStack() },
@@ -779,7 +779,7 @@ fun KhataGoNavHost(
         ) { entry ->
             val emiId = entry.optionalLongArg("emiId")
             val vm: EmiFormViewModel = khataGoViewModel { EmiFormViewModel(it.emiRepository, emiId) }
-            val emi by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.emi)
+            val emi by vm.emi.collectAsStateWithLifecycle()
             EmiFormScreen(
                 emi = emi,
                 isEdit = emiId != null,
@@ -852,7 +852,7 @@ fun KhataGoNavHost(
             val vm: BorrowedDetailViewModel = khataGoViewModel {
                 BorrowedDetailViewModel(it.personalRepository, debtId)
             }
-            val detail by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.detail)
+            val detail by vm.detail.collectAsStateWithLifecycle()
             BorrowedDetailScreen(
                 detail = detail,
                 onBack = { navController.popBackStack() },
@@ -872,7 +872,7 @@ fun KhataGoNavHost(
             val vm: LentDetailViewModel = khataGoViewModel {
                 LentDetailViewModel(it.personalRepository, lendingId)
             }
-            val detail by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.detail)
+            val detail by vm.detail.collectAsStateWithLifecycle()
             LentDetailScreen(
                 detail = detail,
                 onBack = { navController.popBackStack() },
@@ -1074,7 +1074,7 @@ fun KhataGoNavHost(
             val vm: IncomeExpenseFormViewModel = khataGoViewModel {
                 IncomeExpenseFormViewModel(it.ledgerRepository, "INCOME", incomeId)
             }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             AddIncomeScreen(
                 income = state.income,
                 categories = state.categories,
@@ -1101,7 +1101,7 @@ fun KhataGoNavHost(
             val vm: IncomeExpenseFormViewModel = khataGoViewModel {
                 IncomeExpenseFormViewModel(it.ledgerRepository, "EXPENSE", expenseId)
             }
-            val state by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.state)
+            val state by vm.state.collectAsStateWithLifecycle()
             AddExpenseScreen(
                 expense = state.expense,
                 categories = state.categories,
@@ -1163,8 +1163,8 @@ fun KhataGoNavHost(
 
         composable(Destination.CATEGORIES) {
             val vm: CategoriesViewModel = khataGoViewModel { CategoriesViewModel(it.ledgerRepository) }
-            val categories by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.categories)
-            val tab by androidx.lifecycle.compose.collectAsStateWithLifecycle(vm.currentTab)
+            val categories by vm.categories.collectAsStateWithLifecycle()
+            val tab by vm.currentTab.collectAsStateWithLifecycle()
             CategoriesScreen(
                 categories = categories,
                 tab = tab,
