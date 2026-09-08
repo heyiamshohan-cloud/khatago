@@ -206,3 +206,87 @@ if (!project.hasProperty("khataGoSkipDiagnostics")) {
         finalizedBy(emitDiagnostics)
     }
 }
+
+// ---------------------------------------------------------------------------
+// TEMPORARY CI DIAGNOSTIC — remove before release.
+//
+// This sandbox cannot reach GitHub's log or artifact hosts, so when the Kotlin
+// compile fails on CI the only readable channels are the job summary and check
+// run annotations. This hook re-runs the compile task in a nested build with the
+// output captured, writes it to $GITHUB_STEP_SUMMARY and re-prints every error
+// line as a workflow error command. The nested build passes a property that
+// disables the hook, so there is no recursion.
+// ---------------------------------------------------------------------------
+if (!project.hasProperty("khataGoSkipDiagnostics")) {
+    val emitDiagnostics = tasks.register("khataGoEmitCompileDiagnostics") {
+        mustRunAfter("compileDebugKotlin")
+        doLast {
+            val stdout = java.io.ByteArrayOutputStream()
+            val stderr = java.io.ByteArrayOutputStream()
+            var captured = ""
+            try {
+                project.exec {
+                    workingDir = rootDir
+                    executable = rootDir.resolve("gradlew").absolutePath
+                    args(
+                        ":app:compileDebugKotlin",
+                        "--console=plain",
+                        "--no-daemon",
+                        "-PkhataGoSkipDiagnostics=true"
+                    )
+                    standardOutput = stdout
+                    errorOutput = stderr
+                    isIgnoreExitValue = true
+                }
+                captured = stdout.toString() + "\n" + stderr.toString()
+            } catch (t: Throwable) {
+                captured = "diagnostic re-run threw: " + t.message
+            }
+
+            fun escape(value: String) = value
+                .replace("%", "%25")
+                .replace("\r", "%0D")
+                .replace("\n", "%0A")
+
+            val lines = captured.lineSequence()
+                .map { it.trim() }
+                .filter { line ->
+                    line.startsWith("e:") ||
+                        line.startsWith("w:") ||
+                        "error:" in line ||
+                        "FAILED" in line ||
+                        "Unresolved reference" in line ||
+                        "Expecting" in line
+                }
+                .distinct()
+                .take(80)
+                .toList()
+
+            val report = if (lines.isEmpty()) {
+                "NO ERROR LINES CAPTURED\n--- tail ---\n" + captured.takeLast(4000)
+            } else {
+                lines.joinToString("\n")
+            }
+
+            val summaryPath = System.getenv("GITHUB_STEP_SUMMARY")
+            if (!summaryPath.isNullOrBlank()) {
+                try {
+                    java.io.File(summaryPath).appendText(
+                        "\n## Kotlin compile diagnostics\n\n```\n" + report + "\n```\n"
+                    )
+                } catch (ignored: Throwable) {
+                }
+            }
+
+            if (lines.isEmpty()) {
+                println("::error ::NO ERROR LINES CAPTURED tail=" + escape(captured.takeLast(1500)))
+            } else {
+                lines.forEach { line -> println("::error ::" + escape(line).take(900)) }
+            }
+        }
+    }
+
+    tasks.matching { it.name == "compileDebugKotlin" }.configureEach {
+        finalizedBy(emitDiagnostics)
+    }
+}
