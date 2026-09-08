@@ -13,7 +13,8 @@ import com.shohan.khatago.domain.model.TransactionType
  */
 object CsvExporter {
 
-    private const val BOM = "﻿"
+    // Built from an escape so this source file holds no literal byte order mark.
+    private const val BOM = "\uFEFF"
 
     private val HEADERS = listOf(
         "Date",

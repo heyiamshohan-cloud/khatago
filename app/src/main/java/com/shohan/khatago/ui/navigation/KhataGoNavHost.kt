@@ -1128,9 +1128,7 @@ fun KhataGoNavHost(
             val vm: TransactionDetailViewModel = khataGoViewModel {
                 TransactionDetailViewModel(it.ledgerRepository, entryId)
             }
-            val ledgerEntry by produceState<LedgerEntry?>(null, entryId) {
-                value = vm.load()
-            }
+            val ledgerEntry = rememberAsync<LedgerEntry?>(null, entryId) { vm.load() }
             val current = ledgerEntry
             if (current != null) {
                 TransactionDetailScreen(
