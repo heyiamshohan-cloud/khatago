@@ -92,9 +92,15 @@ val khataGoLintReport = tasks.register("khataGoLintReport") {
             return@doLast
         }
         val text = xml.readText()
+        val severities = LinkedHashMap<String, Int>()
         val messages = ArrayList<String>()
         for (chunk in text.split("<issue")) {
-            if (!chunk.contains("severity=\"Error\"")) continue
+            val severityMatcher =
+                java.util.regex.Pattern.compile("severity=\"([^\"]*)\"").matcher(chunk)
+            if (!severityMatcher.find()) continue
+            val severity = severityMatcher.group(1)
+            severities[severity] = (severities[severity] ?: 0) + 1
+            if (severity != "Fatal" && severity != "Error") continue
             val message = java.util.regex.Pattern.compile("message=\"([^\"]*)\"").matcher(chunk)
             val location = java.util.regex.Pattern.compile("file=\"([^\"]*)\"").matcher(chunk)
             if (message.find()) {
@@ -102,7 +108,11 @@ val khataGoLintReport = tasks.register("khataGoLintReport") {
                 messages.add(where + " :: " + message.group(1))
             }
         }
-        println("::error::khataGo lint: " + messages.size + " error(s)")
+        println("::error::khataGo lint severities: " + severities)
+        println("::error::khataGo lint: " + messages.size + " aborting issue(s)")
+        if (messages.isEmpty()) {
+            println("::error::khataGo lint head: " + khataGoClean(text.take(400)))
+        }
         messages.take(12).forEach { entry ->
             val clean = entry
                 .replace("%", "%25")
