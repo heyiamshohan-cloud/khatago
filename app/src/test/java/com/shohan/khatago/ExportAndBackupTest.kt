@@ -123,7 +123,11 @@ class ExportAndBackupTest {
     fun backupPayload_keepsMoneyAsIntegersNeverFloats() {
         val json = Json { encodeDefaults = true }
         val text = json.encodeToString(
-            BackupPayload(expenses = listOf(ExpenseEntity(id = 1L, amount = 250_50L)))
+            BackupPayload(
+                expenses = listOf(
+                    ExpenseEntity(id = 1L, amount = 250_50L, dateEpochDay = 20_500L)
+                )
+            )
         )
         assertThat(text).doesNotContain(".5,")
         assertThat(text).contains("25050")
