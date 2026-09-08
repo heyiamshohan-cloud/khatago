@@ -103,7 +103,7 @@ val khataGoLintReport = tasks.register("khataGoLintReport") {
             }
         }
         println("::error::khataGo lint: " + messages.size + " error(s)")
-        messages.take(8).forEach { entry ->
+        messages.take(12).forEach { entry ->
             val clean = entry
                 .replace("%", "%25")
                 .replace(13.toChar().toString(), "%0D")

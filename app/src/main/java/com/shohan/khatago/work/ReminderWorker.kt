@@ -1,5 +1,6 @@
 package com.shohan.khatago.work
 
+import android.annotation.SuppressLint
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -174,6 +175,7 @@ class ReminderWorker(
         return Result.success()
     }
 
+    @SuppressLint("MissingPermission")
     private fun notifyGroup(
         notificationId: Int,
         items: List<Obligation>,

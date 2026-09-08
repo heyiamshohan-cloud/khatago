@@ -628,7 +628,7 @@ fun KhataGoNavHost(
             val vm: ShopPaymentFormViewModel = khataGoViewModel {
                 ShopPaymentFormViewModel(it.shopRepository, shopId, paymentId)
             }
-            val remaining by produceState(0L, shopId) { value = vm.remaining() }
+            val remaining = rememberAsync(0L, shopId) { vm.remaining() }
             var initialAmount by remember { mutableStateOf("") }
             var initialNotes by remember { mutableStateOf("") }
             var initialDate by remember { mutableStateOf(LocalDate.now()) }
@@ -717,8 +717,8 @@ fun KhataGoNavHost(
             val vm: LoanPaymentFormViewModel = khataGoViewModel {
                 LoanPaymentFormViewModel(it.loanRepository, loanId, paymentId)
             }
-            val remaining by produceState(0L, loanId) { value = vm.remaining() }
-            val nextRemaining by produceState(0L, loanId) { value = vm.nextInstallmentRemaining() }
+            val remaining = rememberAsync(0L, loanId) { vm.remaining() }
+            val nextRemaining = rememberAsync(0L, loanId) { vm.nextInstallmentRemaining() }
             var initialAmount by remember { mutableStateOf("") }
             var initialNotes by remember { mutableStateOf("") }
             var initialDate by remember { mutableStateOf(LocalDate.now()) }
@@ -808,8 +808,8 @@ fun KhataGoNavHost(
             val vm: EmiPaymentFormViewModel = khataGoViewModel {
                 EmiPaymentFormViewModel(it.emiRepository, emiId, paymentId)
             }
-            val remaining by produceState(0L, emiId) { value = vm.remaining() }
-            val nextRemaining by produceState(0L, emiId) { value = vm.nextInstallmentRemaining() }
+            val remaining = rememberAsync(0L, emiId) { vm.remaining() }
+            val nextRemaining = rememberAsync(0L, emiId) { vm.nextInstallmentRemaining() }
             var initialAmount by remember { mutableStateOf("") }
             var initialNotes by remember { mutableStateOf("") }
             var initialDate by remember { mutableStateOf(LocalDate.now()) }
@@ -989,7 +989,7 @@ fun KhataGoNavHost(
             val vm: RepaymentFormViewModel = khataGoViewModel {
                 RepaymentFormViewModel(it.personalRepository, debtId, repaymentId)
             }
-            val remaining by produceState(0L, debtId) { value = vm.remaining() }
+            val remaining = rememberAsync(0L, debtId) { vm.remaining() }
             var initialAmount by remember { mutableStateOf("") }
             var initialNotes by remember { mutableStateOf("") }
             var initialDate by remember { mutableStateOf(LocalDate.now()) }
@@ -1031,7 +1031,7 @@ fun KhataGoNavHost(
             val vm: ReturnFormViewModel = khataGoViewModel {
                 ReturnFormViewModel(it.personalRepository, lendingId, returnId)
             }
-            val remaining by produceState(0L, lendingId) { value = vm.remaining() }
+            val remaining = rememberAsync(0L, lendingId) { vm.remaining() }
             var initialAmount by remember { mutableStateOf("") }
             var initialNotes by remember { mutableStateOf("") }
             var initialDate by remember { mutableStateOf(LocalDate.now()) }
@@ -1246,6 +1246,13 @@ private fun optionalLong(name: String) = navArgument(name) {
 }
 
 private fun NavBackStackEntry.longArg(name: String): Long = arguments?.getLong(name) ?: 0L
+
+@Composable
+private fun <T> rememberAsync(initial: T, key1: Any?, block: suspend () -> T): T {
+    var state by remember(key1) { mutableStateOf(initial) }
+    LaunchedEffect(key1) { state = block() }
+    return state
+}
 
 private fun NavBackStackEntry.optionalLongArg(name: String): Long? =
     arguments?.getLong(name)?.takeIf { it != 0L }
