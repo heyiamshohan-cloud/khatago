@@ -111,6 +111,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.core)
+    // Material Icons Extended: the outlined set used by KhataGo (AccountBalance,
+    // BarChart, CalendarMonth, Person, ...) is not part of the core artifact.
+    implementation(libs.androidx.compose.material.icons.extended)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Navigation

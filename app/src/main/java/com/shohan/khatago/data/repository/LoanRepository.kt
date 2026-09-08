@@ -331,7 +331,10 @@ class LoanRepository(
         }
     }
 
-    fun observeUpcoming(horizonEpochDay: Long, limit: Int) =
+    suspend fun upcoming(
+        horizonEpochDay: Long,
+        limit: Int
+    ): List<com.shohan.khatago.data.local.db.dao.UpcomingLoanRow> =
         dao.upcomingInstallments(horizonEpochDay, limit)
 }
 

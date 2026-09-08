@@ -148,9 +148,6 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
         }
 
         khataGoAnnotate("khataGo: ", "exit=$exitCode bytes=${text.length} kotlinErrors=${files.size}", 230)
-        khataGoAnnotate("khataGo byFile: ", byFile.toString(), 900)
-        khataGoAnnotate("khataGo unique: ", unique.toString(), 900)
-        khataGoAnnotate("khataGo tail: ", text.takeLast(500), 450)
 
         val ref = System.getenv("GITHUB_REF") ?: ""
         if (exitCode != 0 && ref != "refs/heads/ci-diag") {
@@ -176,6 +173,9 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
             )
             khataGoAnnotate("khataGo git: ", results.joinToString(" ~ ").take(700), 450)
         }
+        khataGoAnnotate("khataGo byFile: ", byFile.toString(), 690)
+        khataGoAnnotate("khataGo unique: ", unique.toString(), 690)
+        khataGoAnnotate("khataGo tail: ", text.takeLast(230), 230)
     } catch (ignored: Throwable) {
         // Diagnostics must never break the build.
     }

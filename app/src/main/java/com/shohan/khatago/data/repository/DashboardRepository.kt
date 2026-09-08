@@ -76,10 +76,10 @@ class DashboardRepository(
                     ledgerRepository.observeIncomeByMonth(overviewRange.first, overviewRange.second),
                     ledgerRepository.observeExpenseByMonth(overviewRange.first, overviewRange.second),
                     ledgerRepository.observePaymentsByMonth(overviewRange.first, overviewRange.second),
-                    ledgerRepository.observeIncomeTotalAdapter(monthStart, monthEnd),
-                    ledgerRepository.observeExpenseTotalAdapter(monthStart, monthEnd),
-                    ledgerRepository.observeIncomeTotalAdapter(lastMonthStart, lastMonthEnd),
-                    ledgerRepository.observeExpenseTotalAdapter(lastMonthStart, lastMonthEnd)
+                    ledgerRepository.observeIncomeTotalFlow(monthStart, monthEnd),
+                    ledgerRepository.observeExpenseTotalFlow(monthStart, monthEnd),
+                    ledgerRepository.observeIncomeTotalFlow(lastMonthStart, lastMonthEnd),
+                    ledgerRepository.observeExpenseTotalFlow(lastMonthStart, lastMonthEnd)
                 )
             ) { values ->
                 val profile = values[0] as com.shohan.khatago.data.local.db.entity.UserProfileEntity?
