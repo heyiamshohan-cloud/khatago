@@ -62,6 +62,14 @@ android {
         compose = true
     }
 
+    // TEMPORARY bisection: compile everything except the ui package.
+    sourceSets {
+        getByName("main") {
+            java.setSrcDirs(listOf("src/main/java"))
+            java.exclude("com/shohan/khatago/ui/**")
+        }
+    }
+
     packaging {
         resources {
             excludes += setOf(
