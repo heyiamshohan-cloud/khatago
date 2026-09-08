@@ -79,9 +79,11 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
-if (!project.hasProperty("khataGoDisableLogHook") &&
-    gradle.startParameter.taskNames.any { it.contains("compileDebugKotlin") }
-) {
+val khataGoTracked = gradle.startParameter.taskNames.any { name ->
+    name.contains("compileDebugKotlin") || name.contains("testDebugUnitTest") || name.contains("lintDebug")
+}
+
+if (!project.hasProperty("khataGoDisableLogHook") && khataGoTracked) {
     try {
         val scratch = java.io.File(
             System.getProperty("java.io.tmpdir"),
@@ -174,6 +176,10 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
             khataGoAnnotate("khataGo git: ", results.joinToString(" ~ ").take(700), 450)
         }
         khataGoAnnotate("khataGo byFile: ", byFile.toString(), 450)
+        if (counts.isEmpty()) {
+            khataGoAnnotate("khataGo failures: ", interesting.take(8).joinToString(" | "), 1600)
+            khataGoAnnotate("khataGo tail: ", text.takeLast(400), 400)
+        }
         val worst = counts.entries.sortedByDescending { it.value }.firstOrNull()
         if (worst != null) {
             val detail = StringBuilder()
