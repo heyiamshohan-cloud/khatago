@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.width
 import com.shohan.khatago.ui.theme.CanvasWhite
 import com.shohan.khatago.ui.theme.InkSecondary
 import com.shohan.khatago.ui.theme.Negative

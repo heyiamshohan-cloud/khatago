@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Backup
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Restore
+import Icons.Outlined.Backup
+import Icons.Outlined.Info
+import Icons.Outlined.Restore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.outlined.Backup
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Restore
 import com.shohan.khatago.core.result.Outcome
 import com.shohan.khatago.core.time.KhataGoTime
 import com.shohan.khatago.data.backup.BackupRepository

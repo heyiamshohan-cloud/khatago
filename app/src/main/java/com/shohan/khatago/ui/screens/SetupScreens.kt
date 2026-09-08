@@ -26,8 +26,8 @@ import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Lock
+import Icons.Outlined.Check
+import Icons.Outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,6 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Lock
 import com.shohan.khatago.core.money.Money
 import com.shohan.khatago.ui.components.KhataGoPrimaryButton
 import com.shohan.khatago.ui.components.KhataGoTextField

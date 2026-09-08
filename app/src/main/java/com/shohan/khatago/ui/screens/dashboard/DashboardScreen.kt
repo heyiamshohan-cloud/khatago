@@ -22,12 +22,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingDown
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
-import androidx.compose.material.icons.outlined.AccountBalance
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Storefront
+import Icons.Outlined.AccountBalance
+import Icons.Outlined.Add
+import Icons.Outlined.Check
+import Icons.Outlined.CreditCard
+import Icons.Outlined.Person
+import Icons.Outlined.Storefront
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -82,6 +82,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material.icons.outlined.TrendingDown
+import androidx.compose.material.icons.outlined.TrendingUp
+import Icons.Outlined.TrendingDown
+import Icons.Outlined.TrendingUp
 import java.time.LocalDate
 
 data class DashboardUiState(

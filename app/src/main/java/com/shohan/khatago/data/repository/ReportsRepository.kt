@@ -161,7 +161,8 @@ class ReportsRepository(
                             else -> 0L
                         }
                     },
-                    upcomingCount = (loans + emis).count { it.dueState == DueState.DUE_SOON } +
+                    upcomingCount = loans.count { it.dueState == DueState.DUE_SOON } +
+                        emis.count { it.dueState == DueState.DUE_SOON } +
                         borrowed.count { it.dueState == DueState.DUE_SOON },
                     upcomingTotal = (loans.sumOf { if (it.dueState == DueState.DUE_SOON) it.remaining else 0L } +
                         emis.sumOf { if (it.dueState == DueState.DUE_SOON) it.remaining else 0L } +

@@ -55,7 +55,9 @@ class DashboardRepository(
             val horizon = today.plusDays(upcomingHorizonDays).toEpochDay()
             val monthStart = KhataGoTime.startOfMonth(today).toEpochDay()
             val monthEnd = KhataGoTime.endOfMonth(today).toEpochDay()
-            val (lastMonthStart, lastMonthEnd) = KhataGoTime.lastMonthRange(today)
+            val lastMonth = KhataGoTime.lastMonthRange(today)
+            val lastMonthStart = lastMonth.first.toEpochDay()
+            val lastMonthEnd = lastMonth.second.toEpochDay()
             val overviewRange = monthPeriods(today, overviewMonths)
 
             combineAll(
