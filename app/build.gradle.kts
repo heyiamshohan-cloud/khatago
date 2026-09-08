@@ -141,3 +141,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
 }
+
+// TEMPORARY CI DIAGNOSTIC — remove before release.
+// Prints the full assertion message (expected vs actual) for failing unit tests,
+// which is the only way to read them from the sandbox.
+tasks.withType<Test> {
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStandardStreams = true
+    }
+}
