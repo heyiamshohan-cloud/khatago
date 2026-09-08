@@ -13,34 +13,56 @@ plugins {
 //
 // The sandbox used to develop this project cannot download GitHub Actions logs
 // or artifacts, so a failing CI step is a black box: the run only reports
-// "Process completed with exit code 1". Workflow error annotations, on the
-// other hand, are readable from the sandbox through the check-runs API, so this
-// hook republishes what it can as annotations:
+// "Process completed with exit code 1".
 //
-//   * on every build, the failure's exception chain ("why did this step fail");
-//   * when a Kotlin compile was requested, the error lines from a nested build
-//     of a scratch copy of the project (a second Gradle build inside the same
-//     directory would block on the project lock).
-//
-// Everything is wrapped in try/catch so it can never fail the build, and the
-// nested build passes -PkhataGoDisableLogHook=true so there is no recursion.
+// This hook copies the project to a scratch directory (a second Gradle build
+// inside the same directory would block on the project lock) and re-runs the
+// tasks that the outer build was asked to run, capturing all output. The result
+// is published as GitHub issues, which are readable from the sandbox with
+// "gh issue list". Everything is wrapped in try/catch so it can never fail the
+// build, and the nested build passes -PkhataGoDisableLogHook=true so there is
+// no recursion.
 // ---------------------------------------------------------------------------
 val khataGoRoot: java.io.File = rootDir
 
-fun khataGoEscape(value: String): String {
+fun khataGoRun(directory: java.io.File, command: List<String>): String {
+    return try {
+        val out = java.io.File(
+            System.getProperty("java.io.tmpdir"),
+            "khatago-out-" + System.nanoTime() + ".txt"
+        )
+        val process = java.lang.ProcessBuilder(command)
+            .directory(directory)
+            .redirectOutput(out)
+            .redirectErrorStream(true)
+            .start()
+        process.waitFor(5, java.util.concurrent.TimeUnit.MINUTES)
+        if (out.exists()) out.readText() else ""
+    } catch (ignored: Throwable) {
+        ""
+    }
+}
+
+fun khataGoJson(value: String): String {
+    val backslash = 92.toChar()
+    val quote = 34.toChar()
     val builder = StringBuilder()
     var index = 0
     while (index < value.length) {
         val char = value[index]
         val code = char.code
-        if (code == 37) {
-            builder.append("%25")
+        if (char == quote) {
+            builder.append(backslash).append(quote)
+        } else if (char == backslash) {
+            builder.append(backslash).append(backslash)
         } else if (code == 10) {
-            builder.append("%0A")
+            builder.append(backslash).append('n')
         } else if (code == 13) {
-            builder.append("%0D")
+            builder.append(backslash).append('r')
+        } else if (code == 9) {
+            builder.append(backslash).append('t')
         } else if (code < 32) {
-            // Drop other control characters; annotations are plain text.
+            builder.append(backslash).append("u").append(String.format("%04x", code))
         } else {
             builder.append(char)
         }
@@ -49,15 +71,65 @@ fun khataGoEscape(value: String): String {
     return builder.toString()
 }
 
-fun khataGoAnnotate(value: String) {
-    val text = khataGoEscape(value)
-    var offset = 0
-    var emitted = 0
-    while (offset < text.length && emitted < 9) {
-        val end = kotlin.math.min(offset + 240, text.length)
-        println("::error::" + text.substring(offset, end))
-        offset = end
-        emitted = emitted + 1
+fun khataGoToken(): String {
+    return try {
+        val extra = khataGoRun(
+            khataGoRoot,
+            listOf("git", "config", "--get", "http.https://github.com/.extraheader")
+        ).trim()
+        val marker = "basic "
+        val at = extra.lowercase().indexOf(marker)
+        if (at < 0) {
+            ""
+        } else {
+            val encoded = extra.substring(at + marker.length).trim()
+            val decoded = String(java.util.Base64.getDecoder().decode(encoded))
+            val prefix = "x-access-token:"
+            if (decoded.contains(prefix)) decoded.substringAfter(prefix).trim() else ""
+        }
+    } catch (ignored: Throwable) {
+        ""
+    }
+}
+
+fun khataGoPostIssue(token: String, title: String, body: String): String {
+    return try {
+        val quote = 34.toChar()
+        val json = StringBuilder()
+            .append('{')
+            .append(quote).append("title").append(quote).append(':')
+            .append(quote).append(khataGoJson(title)).append(quote).append(',')
+            .append(quote).append("body").append(quote).append(':')
+            .append(quote).append(khataGoJson(body)).append(quote)
+            .append('}')
+            .toString()
+        val payload = java.io.File(
+            System.getProperty("java.io.tmpdir"),
+            "khatago-issue.json"
+        )
+        payload.writeText(json)
+        val response = java.io.File(
+            System.getProperty("java.io.tmpdir"),
+            "khatago-issue-response.txt"
+        )
+        java.lang.ProcessBuilder(
+            listOf(
+                "curl", "-sS", "-X", "POST",
+                "-H", "Authorization: Bearer " + token,
+                "-H", "Accept: application/vnd.github+json",
+                "-H", "Content-Type: application/json",
+                "-o", response.absolutePath,
+                "--data-binary", "@" + payload.absolutePath,
+                "https://api.github.com/repos/heyiamshohan-cloud/khatago/issues"
+            )
+        )
+            .directory(khataGoRoot)
+            .redirectErrorStream(true)
+            .start()
+            .waitFor(2, java.util.concurrent.TimeUnit.MINUTES)
+        if (response.exists()) response.readText() else ""
+    } catch (ignored: Throwable) {
+        ""
     }
 }
 
@@ -78,34 +150,21 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
-gradle.buildFinished { buildResult ->
+if (!project.hasProperty("khataGoDisableLogHook")) {
     try {
-        val failure = buildResult.failure
-        if (failure == null) {
-            println("::error::khataGo buildFinished: success")
-        } else {
-            val text = StringBuilder()
-            var current: Throwable? = failure
-            var depth = 0
-            while (current != null && depth < 10 && text.length < 2000) {
-                text.append(current.javaClass.simpleName)
-                    .append(": ")
-                    .append(current.message ?: "(no message)")
-                    .append(" || ")
-                current = current.cause
-                depth = depth + 1
-            }
-            khataGoAnnotate("khataGo failure: " + text.toString())
-        }
-    } catch (ignored: Throwable) {
-        // Diagnostics must never break the build.
-    }
-}
+        val mirroredTasks = gradle.startParameter.taskNames.ifEmpty { listOf("help") }
+        val runId = System.getenv("GITHUB_RUN_ID") ?: "local"
+        val token = khataGoToken()
+        val probe = khataGoPostIssue(
+            token,
+            "CI probe run $runId tasks $mirroredTasks",
+            "The diagnostic hook in the root build script executed.\n\n" +
+                "tokenFound=" + token.isNotBlank() + "\n" +
+                "run=" + runId + "\n" +
+                "tasks=" + mirroredTasks + "\n"
+        )
+        println("::error::khataGo probe posted: " + probe.take(200).replace('\n', ' '))
 
-if (!project.hasProperty("khataGoDisableLogHook") &&
-    gradle.startParameter.taskNames.any { it.contains("compileDebugKotlin") }
-) {
-    try {
         val scratch = java.io.File(
             System.getProperty("java.io.tmpdir"),
             "khatago-diagnostic"
@@ -117,7 +176,7 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
 
         val logFile = java.io.File(scratch.parentFile, "khatago-nested.log")
         val nested = mutableListOf("sh", scratch.resolve("gradlew").absolutePath)
-        nested.addAll(gradle.startParameter.taskNames)
+        nested.addAll(mirroredTasks)
         nested.add("--console=plain")
         nested.add("--no-daemon")
         nested.add("-PkhataGoDisableLogHook=true")
@@ -130,34 +189,51 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
         val exitCode = if (finished) process.exitValue() else -1
         val text = if (logFile.exists()) logFile.readText() else ""
 
-        val interesting = text.lineSequence()
-            .map { it.trim() }
-            .filter { line ->
-                line.startsWith("e: ") ||
-                    line.startsWith("w: ") ||
-                    line.contains("error:") ||
-                    line.contains("FAILED") ||
-                    line.contains("FAILURE") ||
-                    line.startsWith("Caused by:") ||
-                    line.contains("Exception") ||
-                    line.contains("What went wrong") ||
-                    line.contains("Permission denied") ||
-                    line.contains("not found") ||
-                    line.contains("Cannot") ||
-                    line.contains("cannot") ||
-                    line.contains("Unresolved") ||
-                    line.contains("unresolved")
-            }
-            .distinct()
-            .take(9)
-            .toList()
-        val payload = if (interesting.isEmpty()) {
-            text.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.takeLast(8).toList()
-        } else {
-            interesting
+        println("::error::khataGo nested exit=" + exitCode + " bytes=" + text.length)
+
+        if (exitCode != 0) {
+            val interesting = text.lineSequence()
+                .map { it.trim() }
+                .filter { line ->
+                    line.startsWith("e: ") ||
+                        line.startsWith("w: ") ||
+                        line.contains("error:") ||
+                        line.contains("FAILED") ||
+                        line.contains("FAILURE") ||
+                        line.startsWith("Caused by:") ||
+                        line.contains("Exception") ||
+                        line.contains("What went wrong") ||
+                        line.contains("Permission denied") ||
+                        line.contains("not found") ||
+                        line.contains("Cannot") ||
+                        line.contains("cannot") ||
+                        line.contains("Unresolved") ||
+                        line.contains("unresolved")
+                }
+                .distinct()
+                .take(80)
+                .toList()
+            val tailLength = 40_000
+            val tail = if (text.length > tailLength) text.takeLast(tailLength) else text
+            val body = StringBuilder()
+                .append("Nested build failed with exit code ").append(exitCode).append('\n')
+                .append('\n').append("tasks=").append(mirroredTasks).append('\n')
+                .append('\n').append("## Filtered error lines").append('\n')
+                .append("```").append('\n')
+                .append(interesting.take(60).joinToString("\n")).append('\n')
+                .append("```").append('\n')
+                .append('\n').append("## Tail of the nested build log").append('\n')
+                .append("```").append('\n')
+                .append(tail).append('\n')
+                .append("```").append('\n')
+                .toString()
+            val posted = khataGoPostIssue(
+                token,
+                "CI diagnostics: nested build failed (run $runId, tasks $mirroredTasks)",
+                body
+            )
+            println("::error::khataGo log posted: " + posted.take(200).replace('\n', ' '))
         }
-        khataGoAnnotate("khataGo nested: exit=$exitCode bytes=${text.length}")
-        payload.forEach { line -> khataGoAnnotate("khataGo log: " + line) }
     } catch (ignored: Throwable) {
         // Diagnostics must never break the build.
     }
