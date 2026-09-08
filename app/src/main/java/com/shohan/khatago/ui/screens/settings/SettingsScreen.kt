@@ -39,6 +39,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.TableChart
+import androidx.compose.foundation.layout.ColumnScope
 import com.shohan.khatago.core.time.KhataGoTime
 import com.shohan.khatago.data.repository.AppSettings
 import com.shohan.khatago.data.repository.SettingsRepository
