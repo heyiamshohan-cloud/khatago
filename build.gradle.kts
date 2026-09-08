@@ -83,7 +83,7 @@ val khataGoTracked = gradle.startParameter.taskNames.any { name ->
     name.contains("compileDebugKotlin") || name.contains("testDebugUnitTest") || name.contains("lintDebug")
 }
 
-if (!project.hasProperty("khataGoDisableLogHook") && khataGoTracked) {
+if (!project.hasProperty("khataGoDisableLogHook")) {
     try {
         val scratch = java.io.File(
             System.getProperty("java.io.tmpdir"),
