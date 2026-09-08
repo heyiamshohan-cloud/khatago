@@ -152,3 +152,46 @@ tasks.withType<Test> {
         showStandardStreams = true
     }
 }
+
+// ---------------------------------------------------------------------------
+// TEMPORARY CI DIAGNOSTIC — remove before release.
+//
+// Lint runs with abortOnError, and CI logs cannot be downloaded from the
+// sandbox, so a failing lint step is otherwise unreadable. This finalizer runs
+// even when lintDebug fails and republishes the lint errors as workflow
+// annotations, which are readable through the check-runs API.
+// ---------------------------------------------------------------------------
+val khataGoLintReport = tasks.register("khataGoLintReport") {
+    doLast {
+        val xml = file("build/reports/lint-results-debug.xml")
+        if (!xml.exists()) {
+            println("::error::khataGo lint: no report at " + xml.path)
+            return@doLast
+        }
+        val text = xml.readText()
+        val messages = ArrayList<String>()
+        for (chunk in text.split("<issue")) {
+            if (!chunk.contains("severity=\"Error\"")) continue
+            val message = java.util.regex.Pattern.compile("message=\"([^\"]*)\"").matcher(chunk)
+            val location = java.util.regex.Pattern.compile("file=\"([^\"]*)\"").matcher(chunk)
+            if (message.find()) {
+                val where = if (location.find()) location.group(1).substringAfterLast('/') else "?"
+                val id = java.util.regex.Pattern.compile("id=\"([^\"]*)\"").matcher(chunk)
+                val issueId = if (id.find()) id.group(1) else "?"
+                messages.add(where + " [" + issueId + "] " + message.group(1))
+            }
+        }
+        println("::error::khataGo lint: " + messages.size + " error(s)")
+        messages.take(8).forEach { entry ->
+            val clean = entry
+                .replace("%", "%25")
+                .replace(13.toChar().toString(), "%0D")
+                .replace(10.toChar().toString(), "%0A")
+            println("::error::" + clean.take(230))
+        }
+    }
+}
+
+tasks.matching { it.name == "lintDebug" }.configureEach {
+    finalizedBy(khataGoLintReport)
+}
