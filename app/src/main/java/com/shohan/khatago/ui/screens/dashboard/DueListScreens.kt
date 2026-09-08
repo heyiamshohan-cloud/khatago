@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shohan.khatago.core.money.Money
+import com.shohan.khatago.core.time.KhataGoTime
 import com.shohan.khatago.data.repository.DashboardRepository
 import com.shohan.khatago.domain.model.AccountKind
 import com.shohan.khatago.domain.model.DueState
@@ -116,7 +117,11 @@ fun DueListScreen(
                         Column {
                             items.forEachIndexed { index, item ->
                                 KhataGoUpcomingRow(
-                                    item = item,
+                                    dateLabel = KhataGoTime.formatRelativeDate(item.dueDate),
+                                    title = item.title,
+                                    subtitle = item.subtitle,
+                                    amount = item.remaining,
+                                    dueState = item.dueState,
                                     onClick = { onOpen(item.kind, item.refId) }
                                 )
                                 if (index < items.size - 1) {
