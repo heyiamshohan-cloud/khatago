@@ -193,7 +193,7 @@ fun SearchScreen(
                     }
                 }
 
-                uiState.results.isEmpty() -> {
+                uiState.results.isEmpty -> {
                     item {
                         KhataGoCard(
                             containerColor = SurfaceWhite,

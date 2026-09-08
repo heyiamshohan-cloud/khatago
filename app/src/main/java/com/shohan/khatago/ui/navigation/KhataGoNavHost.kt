@@ -1176,9 +1176,8 @@ fun KhataGoNavHost(
         }
 
         composable(Destination.APP_LOCK) {
-            val settings by androidx.lifecycle.compose.collectAsStateWithLifecycle(
-                khataGoViewModel { SettingsViewModel(it.settingsRepository) }.settings
-            )
+            val settingsVm: SettingsViewModel = khataGoViewModel { SettingsViewModel(it.settingsRepository) }
+            val settings by settingsVm.settings.collectAsStateWithLifecycle()
             AppLockScreen(
                 hasPin = settings.hasPin,
                 lockEnabled = settings.appLockEnabled,
@@ -1204,9 +1203,8 @@ fun KhataGoNavHost(
         }
 
         composable(Destination.BACKUP) {
-            val settings by androidx.lifecycle.compose.collectAsStateWithLifecycle(
-                khataGoViewModel { SettingsViewModel(it.settingsRepository) }.settings
-            )
+            val settingsVm: SettingsViewModel = khataGoViewModel { SettingsViewModel(it.settingsRepository) }
+            val settings by settingsVm.settings.collectAsStateWithLifecycle()
             BackupScreen(
                 lastBackupAt = settings.lastBackupAt,
                 onBack = { navController.popBackStack() },

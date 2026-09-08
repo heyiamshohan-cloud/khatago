@@ -387,7 +387,7 @@ class ShopPaymentFormViewModel(
         date: LocalDate,
         method: PaymentMethod,
         notes: String,
-        creditId: Long?,
+        creditId: Long? = null,
         onResult: (PaymentResult) -> Unit
     ) {
         viewModelScope.launch {

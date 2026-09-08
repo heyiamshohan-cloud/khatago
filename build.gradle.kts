@@ -173,9 +173,23 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
             )
             khataGoAnnotate("khataGo git: ", results.joinToString(" ~ ").take(700), 450)
         }
-        khataGoAnnotate("khataGo byFile: ", byFile.toString(), 690)
-        khataGoAnnotate("khataGo unique: ", unique.toString(), 690)
-        khataGoAnnotate("khataGo tail: ", text.takeLast(230), 230)
+        khataGoAnnotate("khataGo byFile: ", byFile.toString(), 450)
+        val worst = counts.entries.sortedByDescending { it.value }.firstOrNull()
+        if (worst != null) {
+            val detail = StringBuilder()
+            var cursor = 0
+            while (cursor < files.size) {
+                if (files[cursor] == worst.key) {
+                    detail.append(lines[cursor]).append(":").append(messages[cursor]).append(" | ")
+                }
+                cursor = cursor + 1
+            }
+            khataGoAnnotate(
+                "khataGo worst " + worst.key + "(" + worst.value + "): ",
+                detail.toString(),
+                1600
+            )
+        }
     } catch (ignored: Throwable) {
         // Diagnostics must never break the build.
     }
