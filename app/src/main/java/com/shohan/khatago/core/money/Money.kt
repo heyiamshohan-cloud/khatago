@@ -159,16 +159,21 @@ object Money {
         val taka = magnitude / MINOR_UNITS_PER_MAJOR
         val sign = if (negative) "−" else ""
         return when {
-            taka >= 1_00_00_000L -> sign + symbol + trimDecimal(taka / 1_00_00_000.0) + "Cr"
-            taka >= 1_00_000L -> sign + symbol + trimDecimal(taka / 1_00_000.0) + "L"
-            taka >= 1_000L -> sign + symbol + trimDecimal(taka / 1_000.0) + "K"
+            taka >= 1_00_00_000L -> sign + symbol + shortDecimal(taka, 1_00_00_000L) + "Cr"
+            taka >= 1_00_000L -> sign + symbol + shortDecimal(taka, 1_00_000L) + "L"
+            taka >= 1_000L -> sign + symbol + shortDecimal(taka, 1_000L) + "K"
             else -> sign + symbol + taka.toString()
         }
     }
 
-    private fun trimDecimal(value: Double): String {
-        val rounded = (value * 10).toLong() / 10.0
-        return if (rounded % 1.0 == 0.0) rounded.toLong().toString() else rounded.toString()
+    /**
+     * value / divisor truncated to one decimal, in integer arithmetic so no
+     * Double is introduced anywhere in the money code.
+     */
+    private fun shortDecimal(value: Long, divisor: Long): String {
+        val whole = value / divisor
+        val tenths = (value % divisor) * 10 / divisor
+        return if (tenths == 0L) whole.toString() else whole.toString() + "." + tenths.toString()
     }
 
     private fun groupThousands(value: Long): String {
