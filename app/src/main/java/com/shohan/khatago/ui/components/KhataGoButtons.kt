@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.shohan.khatago.ui.theme.InkSecondary
@@ -84,7 +85,8 @@ fun KhataGoTextButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    color: Color = Color.Unspecified
 ) {
     TextButton(
         onClick = onClick,
@@ -92,7 +94,15 @@ fun KhataGoTextButton(
         enabled = enabled,
         shape = RoundedCornerShape(ShapeTokens.Medium)
     ) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (color == Color.Unspecified) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                color
+            }
+        )
     }
 }
 

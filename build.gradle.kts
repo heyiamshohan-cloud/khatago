@@ -33,13 +33,14 @@ fun khataGoClean(value: String): String {
         .replace("|", " ")
 }
 
-fun khataGoAnnotate(prefix: String, value: String) {
+fun khataGoAnnotate(prefix: String, value: String, limit: Int) {
     val text = khataGoClean(prefix + value)
+    val end = if (limit < text.length) limit else text.length
     var offset = 0
-    while (offset < text.length) {
-        val end = if (offset + 230 < text.length) offset + 230 else text.length
-        println("::error::" + text.substring(offset, end))
-        offset = end
+    while (offset < end) {
+        val stop = if (offset + 230 < end) offset + 230 else end
+        println("::error::" + text.substring(offset, stop))
+        offset = stop
     }
 }
 
@@ -88,35 +89,50 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
         val exitCode = if (finished) process.exitValue() else -1
         val text = if (logFile.exists()) logFile.readText() else ""
 
-        val interesting = text.lineSequence()
-            .map { it.trim() }
-            .filter { line ->
-                line.startsWith("e: ") ||
-                    line.startsWith("w: ") ||
-                    line.contains("error:") ||
-                    line.contains("FAILED") ||
-                    line.contains("FAILURE") ||
-                    line.startsWith("Caused by:") ||
-                    line.contains("Exception") ||
-                    line.contains("What went wrong") ||
-                    line.contains("Permission denied") ||
-                    line.contains("not found") ||
-                    line.contains("Cannot") ||
-                    line.contains("cannot") ||
-                    line.contains("Unresolved") ||
-                    line.contains("unresolved")
-            }
-            .distinct()
-            .take(8)
-            .toList()
-
-        khataGoAnnotate("khataGo: ", "exit=$exitCode bytes=${text.length} tasks=${gradle.startParameter.taskNames}")
-        if (interesting.isEmpty()) {
-            khataGoAnnotate("khataGo tail: ", text.takeLast(1400))
-        } else {
-            khataGoAnnotate("khataGo errors: ", interesting.joinToString(" | "))
-            khataGoAnnotate("khataGo tail: ", text.takeLast(900))
+        val root = "/com/shohan/khatago/"
+        val files = ArrayList<String>()
+        val lines = ArrayList<String>()
+        val messages = ArrayList<String>()
+        for (raw in text.lineSequence()) {
+            val entry = raw.trim()
+            if (!entry.startsWith("e: file://")) continue
+            val at = entry.indexOf(root)
+            if (at < 0) continue
+            val rest = entry.substring(at + root.length)
+            val first = rest.indexOf(':')
+            if (first < 0) continue
+            val second = rest.indexOf(':', first + 1)
+            if (second < 0) continue
+            val afterColon = rest.substring(second + 1).trim()
+            val space = afterColon.indexOf(' ')
+            files.add(rest.substring(0, first))
+            lines.add(rest.substring(first + 1, second))
+            messages.add(if (space < 0) afterColon else afterColon.substring(space + 1).trim())
         }
+
+        val counts = HashMap<String, Int>()
+        for (name in files) counts[name] = (counts[name] ?: 0) + 1
+        val byFile = StringBuilder()
+        for (entry in counts.entries.sortedByDescending { it.value }) {
+            byFile.append(entry.key).append("(").append(entry.value).append(") ")
+        }
+
+        val seen = HashSet<String>()
+        val unique = StringBuilder()
+        var index = 0
+        while (index < messages.size && seen.size < 12) {
+            val message = messages[index]
+            if (seen.add(message)) {
+                unique.append(files[index]).append(":").append(lines[index])
+                    .append(" ").append(message).append(" | ")
+            }
+            index = index + 1
+        }
+
+        khataGoAnnotate("khataGo: ", "exit=$exitCode bytes=${text.length} kotlinErrors=${files.size}", 230)
+        khataGoAnnotate("khataGo byFile: ", byFile.toString(), 900)
+        khataGoAnnotate("khataGo unique: ", unique.toString(), 900)
+        khataGoAnnotate("khataGo tail: ", text.takeLast(500), 450)
     } catch (ignored: Throwable) {
         // Diagnostics must never break the build.
     }
