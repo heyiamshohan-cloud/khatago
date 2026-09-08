@@ -15,11 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingDown
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
-import Icons.Outlined.AccountBalance
-import Icons.Outlined.CreditCard
-import Icons.Outlined.Person
-import Icons.Outlined.ShoppingBag
-import Icons.Outlined.Storefront
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,8 +37,8 @@ import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material.icons.outlined.TrendingDown
 import androidx.compose.material.icons.outlined.TrendingUp
-import Icons.Outlined.TrendingDown
-import Icons.Outlined.TrendingUp
+import androidx.compose.material.icons.outlined.TrendingDown
+import androidx.compose.material.icons.outlined.TrendingUp
 import com.shohan.khatago.core.money.Money
 import com.shohan.khatago.core.time.KhataGoTime
 import com.shohan.khatago.domain.model.AccountKind

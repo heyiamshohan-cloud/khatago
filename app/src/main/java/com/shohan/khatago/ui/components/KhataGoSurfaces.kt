@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.outlined.ShowChart
-import Icons.Outlined.ShowChart
+import androidx.compose.material.icons.outlined.ShowChart
 import com.shohan.khatago.ui.theme.DividerSoft
 import com.shohan.khatago.ui.theme.InkPrimary
 import com.shohan.khatago.ui.theme.InkSecondary

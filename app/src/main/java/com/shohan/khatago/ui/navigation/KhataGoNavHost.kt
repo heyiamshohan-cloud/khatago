@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import Icons.Outlined.Add
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +47,7 @@ import com.shohan.khatago.data.repository.ReportRangeKind
 import com.shohan.khatago.domain.model.AccountKind
 import com.shohan.khatago.domain.model.DueState
 import com.shohan.khatago.domain.model.LedgerEntry
-import com.shohan.khatago.domain.model.PersonalTab
+import com.shohan.khatago.ui.screens.accounts.PersonalTab
 import com.shohan.khatago.domain.model.RelatedType
 import com.shohan.khatago.domain.model.UpcomingItem
 import com.shohan.khatago.ui.LocalAppContainer
@@ -130,6 +130,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.outlined.Add
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
 
 /**

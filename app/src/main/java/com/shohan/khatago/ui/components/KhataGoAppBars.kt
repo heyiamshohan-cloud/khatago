@@ -19,11 +19,11 @@ import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import Icons.Outlined.AccountBalance
-import Icons.Outlined.BarChart
-import Icons.Outlined.Home
-import Icons.Outlined.List
-import Icons.Outlined.Settings
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
