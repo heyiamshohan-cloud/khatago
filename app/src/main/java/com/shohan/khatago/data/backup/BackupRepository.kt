@@ -7,6 +7,7 @@ import com.shohan.khatago.core.result.Outcome
 import com.shohan.khatago.data.local.db.KhataGoDatabase
 import com.shohan.khatago.data.repository.SettingsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
@@ -245,9 +246,7 @@ class BackupRepository(
     private suspend fun allShops(): List<com.shohan.khatago.data.local.db.entity.ShopEntity> {
         // Shops are read through the DAO's live query which excludes archived rows,
         // so archived shops are collected separately to keep the backup complete.
-        val active = database.shopDao().let { dao ->
-            kotlinx.coroutines.flow.firstOrNull(dao.observeShops()) ?: emptyList()
-        }
+        val active = database.shopDao().observeShops().firstOrNull() ?: emptyList()
         val archived = database.shopDao().getAllShopsIncludingArchived()
         return (active + archived).distinctBy { it.id }
     }

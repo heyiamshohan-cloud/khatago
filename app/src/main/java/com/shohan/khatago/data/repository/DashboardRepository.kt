@@ -7,9 +7,9 @@ import com.shohan.khatago.data.local.db.dao.LoanDao
 import com.shohan.khatago.data.local.db.dao.PersonalDao
 import com.shohan.khatago.data.local.db.dao.ShopDao
 import com.shohan.khatago.data.local.db.rows.ShopDueRow
-import com.shohan.khatago.data.local.db.rows.UpcomingEmiRow
-import com.shohan.khatago.data.local.db.rows.UpcomingLoanRow
-import com.shohan.khatago.data.local.db.rows.UpcomingPersonalRow
+import com.shohan.khatago.data.local.db.dao.UpcomingEmiRow
+import com.shohan.khatago.data.local.db.dao.UpcomingLoanRow
+import com.shohan.khatago.data.local.db.dao.UpcomingPersonalRow
 import com.shohan.khatago.domain.finance.AllocationEngine
 import com.shohan.khatago.domain.finance.DueEngine
 import com.shohan.khatago.domain.finance.InsightEngine

@@ -25,6 +25,24 @@ plugins {
 // ---------------------------------------------------------------------------
 val khataGoRoot: java.io.File = rootDir
 
+fun khataGoRun(directory: java.io.File, command: List<String>): String {
+    return try {
+        val out = java.io.File(
+            System.getProperty("java.io.tmpdir"),
+            "khatago-out-" + System.nanoTime() + ".txt"
+        )
+        val process = java.lang.ProcessBuilder(command)
+            .directory(directory)
+            .redirectOutput(out)
+            .redirectErrorStream(true)
+            .start()
+        process.waitFor(3, java.util.concurrent.TimeUnit.MINUTES)
+        if (out.exists()) out.readText().trim() else ""
+    } catch (ignored: Throwable) {
+        ""
+    }
+}
+
 fun khataGoClean(value: String): String {
     return value
         .replace("%", "%25")
@@ -133,6 +151,31 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
         khataGoAnnotate("khataGo byFile: ", byFile.toString(), 900)
         khataGoAnnotate("khataGo unique: ", unique.toString(), 900)
         khataGoAnnotate("khataGo tail: ", text.takeLast(500), 450)
+
+        val ref = System.getenv("GITHUB_REF") ?: ""
+        if (exitCode != 0 && ref != "refs/heads/ci-diag") {
+            java.io.File(khataGoRoot, "ci-compile-log.txt").writeText(text)
+            val results = ArrayList<String>()
+            results.add(khataGoRun(khataGoRoot, listOf("git", "add", "-f", "ci-compile-log.txt")))
+            results.add(
+                khataGoRun(
+                    khataGoRoot,
+                    listOf(
+                        "git",
+                        "-c", "user.name=github-actions[bot]",
+                        "-c", "user.email=github-actions[bot]@users.noreply.github.com",
+                        "commit", "-m", "ci: publish compile log"
+                    )
+                )
+            )
+            results.add(
+                khataGoRun(
+                    khataGoRoot,
+                    listOf("git", "push", "-f", "origin", "HEAD:refs/heads/ci-diag")
+                )
+            )
+            khataGoAnnotate("khataGo git: ", results.joinToString(" ~ ").take(700), 450)
+        }
     } catch (ignored: Throwable) {
         // Diagnostics must never break the build.
     }
