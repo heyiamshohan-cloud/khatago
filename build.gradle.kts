@@ -75,13 +75,57 @@ fun khataGoCopy(source: java.io.File, target: java.io.File) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// TEMPORARY CI DIAGNOSTIC — remove before release.
+//
+// Lint runs with abortOnError and CI logs cannot be downloaded from the
+// sandbox, so a failing lint step is otherwise unreadable. This reporter is
+// registered as a finalizer of :app:lintDebug, so it runs even when lint
+// fails, and republishes the errors from the XML report as workflow
+// annotations, which are readable through the check-runs API.
+// ---------------------------------------------------------------------------
+val khataGoLintReport = tasks.register("khataGoLintReport") {
+    doLast {
+        val xml = rootProject.file("app/build/reports/lint-results-debug.xml")
+        if (!xml.exists()) {
+            println("::error::khataGo lint: no report at " + xml.path)
+            return@doLast
+        }
+        val text = xml.readText()
+        val messages = ArrayList<String>()
+        for (chunk in text.split("<issue")) {
+            if (!chunk.contains("severity=\"Error\"")) continue
+            val message = java.util.regex.Pattern.compile("message=\"([^\"]*)\"").matcher(chunk)
+            val location = java.util.regex.Pattern.compile("file=\"([^\"]*)\"").matcher(chunk)
+            if (message.find()) {
+                val where = if (location.find()) location.group(1).substringAfterLast('/') else "?"
+                messages.add(where + " :: " + message.group(1))
+            }
+        }
+        println("::error::khataGo lint: " + messages.size + " error(s)")
+        messages.take(8).forEach { entry ->
+            val clean = entry
+                .replace("%", "%25")
+                .replace(13.toChar().toString(), "%0D")
+                .replace(10.toChar().toString(), "%0A")
+            println("::error::" + clean.take(230))
+        }
+    }
+}
+
+allprojects {
+    tasks.matching { it.name == "lintDebug" }.configureEach {
+        finalizedBy(khataGoLintReport)
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
 if (!project.hasProperty("khataGoDisableLogHook") &&
     gradle.startParameter.taskNames.any { name ->
-        name.contains("compileDebugKotlin") || name.contains("testDebugUnitTest")
+        name == "help" || name.contains("compileDebugKotlin") || name.contains("testDebugUnitTest")
     }
 ) {
     try {
