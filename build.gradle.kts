@@ -79,29 +79,6 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
-gradle.buildFinished(
-    org.gradle.api.Action<org.gradle.BuildResult> { buildResult ->
-        try {
-            val failure = buildResult.failure
-            if (failure != null) {
-                val text = StringBuilder()
-                var current: Throwable? = failure
-                var depth = 0
-                while (current != null && depth < 8) {
-                    text.append(current.javaClass.simpleName)
-                        .append(": ")
-                        .append(current.message ?: "-")
-                        .append(" || ")
-                    current = current.cause
-                    depth = depth + 1
-                }
-                khataGoAnnotate("khataGo outer: ", text.toString(), 1200)
-            }
-        } catch (ignored: Throwable) {
-        }
-    }
-)
-
 if (!project.hasProperty("khataGoDisableLogHook") &&
     gradle.startParameter.taskNames.any { name ->
         name.contains("compileDebugKotlin") || name.contains("testDebugUnitTest")
