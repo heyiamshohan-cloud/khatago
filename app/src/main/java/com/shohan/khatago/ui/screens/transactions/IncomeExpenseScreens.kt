@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shohan.khatago.core.money.Money
 import com.shohan.khatago.domain.model.LedgerEntry
@@ -86,13 +85,13 @@ class IncomeExpenseFormViewModel(
     ) {
         viewModelScope.launch {
             if (amount == null || amount <= 0L) {
-                onResult(Outcome.Failure("Enter a valid amount.", "INVALID_AMOUNT"))
+                onResult(Outcome.Failure("Enter a valid amount."))
                 return@launch
             }
             runCatching {
                 repository.saveIncome(entryId, amount, date, source, category, notes)
             }.onSuccess { onResult(Outcome.Success(it)) }
-                .onFailure { onResult(Outcome.Failure("Couldn't save. Please try again.", "SAVE_FAILED")) }
+                .onFailure { onResult(Outcome.Failure("Couldn't save. Please try again.")) }
         }
     }
 
@@ -106,13 +105,13 @@ class IncomeExpenseFormViewModel(
     ) {
         viewModelScope.launch {
             if (amount == null || amount <= 0L) {
-                onResult(Outcome.Failure("Enter a valid amount.", "INVALID_AMOUNT"))
+                onResult(Outcome.Failure("Enter a valid amount."))
                 return@launch
             }
             runCatching {
                 repository.saveExpense(entryId, amount, date, category, place, notes)
             }.onSuccess { onResult(Outcome.Success(it)) }
-                .onFailure { onResult(Outcome.Failure("Couldn't save. Please try again.", "SAVE_FAILED")) }
+                .onFailure { onResult(Outcome.Failure("Couldn't save. Please try again.")) }
         }
     }
 }
