@@ -12,6 +12,7 @@ sqlite = "2.5.0"
 datastore = "1.1.1"
 work = "2.9.1"
 biometric = "1.1.0"
+fragment = "1.8.5"
 splashscreen = "1.0.1"
 serialization = "1.7.3"
 coroutines = "1.9.0"
@@ -24,6 +25,7 @@ androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx"
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
 
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
