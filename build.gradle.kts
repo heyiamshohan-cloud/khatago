@@ -80,7 +80,9 @@ tasks.register<Delete>("clean") {
 }
 
 if (!project.hasProperty("khataGoDisableLogHook") &&
-    gradle.startParameter.taskNames.any { it.contains("compileDebugKotlin") }
+    gradle.startParameter.taskNames.any { name ->
+        name.contains("compileDebugKotlin") || name.contains("testDebugUnitTest")
+    }
 ) {
     try {
         val scratch = java.io.File(
@@ -149,31 +151,23 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
 
         khataGoAnnotate("khataGo: ", "exit=$exitCode bytes=${text.length} kotlinErrors=${files.size}", 230)
 
-        val ref = System.getenv("GITHUB_REF") ?: ""
-        if (exitCode != 0 && ref != "refs/heads/ci-diag") {
-            java.io.File(khataGoRoot, "ci-compile-log.txt").writeText(text)
-            val results = ArrayList<String>()
-            results.add(khataGoRun(khataGoRoot, listOf("git", "add", "-f", "ci-compile-log.txt")))
-            results.add(
-                khataGoRun(
-                    khataGoRoot,
-                    listOf(
-                        "git",
-                        "-c", "user.name=github-actions[bot]",
-                        "-c", "user.email=github-actions[bot]@users.noreply.github.com",
-                        "commit", "-m", "ci: publish compile log"
-                    )
-                )
-            )
-            results.add(
-                khataGoRun(
-                    khataGoRoot,
-                    listOf("git", "push", "-f", "origin", "HEAD:refs/heads/ci-diag")
-                )
-            )
-            khataGoAnnotate("khataGo git: ", results.joinToString(" ~ ").take(700), 450)
-        }
         khataGoAnnotate("khataGo byFile: ", byFile.toString(), 450)
+        if (counts.isEmpty()) {
+            val notes = StringBuilder()
+            for (raw in text.lineSequence()) {
+                val line = raw.trim()
+                if (line.contains("FAILED") ||
+                    line.contains("expected:") ||
+                    line.contains("AssertionError") ||
+                    line.contains("ComparisonFailure") ||
+                    line.contains("org.opentest4j") ||
+                    line.startsWith("at com.shohan.khatago.")
+                ) {
+                    notes.append(line).append(" | ")
+                }
+            }
+            khataGoAnnotate("khataGo failures: ", notes.toString(), 1600)
+        }
         val worst = counts.entries.sortedByDescending { it.value }.firstOrNull()
         if (worst != null) {
             val detail = StringBuilder()
