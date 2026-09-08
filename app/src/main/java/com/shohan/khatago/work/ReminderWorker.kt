@@ -292,6 +292,16 @@ class ReminderScheduler(context: Context) {
         workManager.cancelUniqueWork(UNIQUE_WORK_NAME)
     }
 
+    /** Turns reminders on: (re)schedules the daily scan immediately. */
+    fun enable() {
+        scheduleDailyReminderScan()
+    }
+
+    /** Turns reminders off: no further scans are scheduled. */
+    fun disable() {
+        cancel()
+    }
+
     private companion object {
         const val UNIQUE_WORK_NAME = "khatago_payment_reminders"
     }

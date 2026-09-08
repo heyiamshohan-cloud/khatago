@@ -211,9 +211,3 @@ private fun SettingsGroup(
         KhataGoGroupCard(content = content)
     }
 }
-
-/** Turns the stored backup timestamp into a calendar date for display. */
-private fun Long.toBackupDate(): java.time.LocalDate =
-    java.time.Instant.ofEpochMilli(this)
-        .atZone(java.time.ZoneId.systemDefault())
-        .toLocalDate()
