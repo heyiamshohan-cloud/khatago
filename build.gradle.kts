@@ -166,7 +166,8 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
                     notes.append(line).append(" | ")
                 }
             }
-            khataGoAnnotate("khataGo failures: ", notes.toString(), 1600)
+            khataGoAnnotate("khataGo failures: ", notes.toString(), 460)
+            khataGoAnnotate("khataGo tail: ", text.takeLast(1380), 1380)
         }
         val worst = counts.entries.sortedByDescending { it.value }.firstOrNull()
         if (worst != null) {
