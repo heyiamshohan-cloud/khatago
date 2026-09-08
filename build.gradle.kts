@@ -56,12 +56,10 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
         scratch.deleteRecursively()
         scratch.mkdirs()
         khataGoCopy(khataGoRoot, scratch)
-        scratch.resolve("gradlew").setExecutable(true)
 
         val logFile = java.io.File(scratch.parentFile, "khatago-compile.log")
         val process = java.lang.ProcessBuilder(
             listOf(
-                "sh",
                 scratch.resolve("gradlew").absolutePath,
                 ":app:compileDebugKotlin",
                 "--console=plain",
@@ -73,12 +71,9 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
             .redirectOutput(logFile)
             .redirectErrorStream(true)
             .start()
-        val finished = process.waitFor(20, java.util.concurrent.TimeUnit.MINUTES)
-        val exitCode = if (finished) process.exitValue() else -1
+        process.waitFor(20, java.util.concurrent.TimeUnit.MINUTES)
 
         val text = if (logFile.exists()) logFile.readText() else ""
-        val statusLine = "khataGo diagnostic: files=${scratch.listFiles()?.size ?: 0} " +
-            "exit=$exitCode logBytes=${text.length}"
         val interesting = text.lineSequence()
             .map { it.trim() }
             .filter { line ->
@@ -99,13 +94,7 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
             .replace("\n", "%0A")
 
         // Channel 1 — workflow error annotations (GitHub keeps ~10 per step).
-        val payload = if (interesting.isEmpty()) {
-            text.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.takeLast(9).toList()
-        } else {
-            interesting.take(9)
-        }
-        println("::error::${khataGoEscape(statusLine)}")
-        payload.forEach { line -> println("::error::${khataGoEscape(line)}") }
+        interesting.take(10).forEach { line -> println("::error::${khataGoEscape(line)}") }
 
         // Channel 2 — a tag carrying the full log.
         val logCopy = java.io.File(khataGoRoot, "ci-compile-log.txt")
