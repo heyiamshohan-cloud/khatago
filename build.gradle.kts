@@ -146,36 +146,6 @@ fun khataGoCopy(source: java.io.File, target: java.io.File) {
     }
 }
 
-fun khataGoEscape(value: String): String {
-    return value
-        .replace("%", "%25")
-        .replace(13.toChar().toString(), "%0D")
-        .replace(10.toChar().toString(), "%0A")
-}
-
-gradle.buildFinished { buildResult ->
-    try {
-        val failure = buildResult.failure
-        if (failure == null) {
-            println("::error::khataGo buildFinished: success")
-        } else {
-            val text = StringBuilder()
-            var current: Throwable? = failure
-            var depth = 0
-            while (current != null && depth < 10) {
-                text.append(current.javaClass.simpleName)
-                text.append(": ")
-                text.append(current.message ?: "(no message)")
-                text.append(" || ")
-                current = current.cause
-                depth = depth + 1
-            }
-            println("::error::khataGo failure: " + khataGoEscape(text.toString()).take(1200))
-        }
-    } catch (ignored: Throwable) {
-    }
-}
-
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
