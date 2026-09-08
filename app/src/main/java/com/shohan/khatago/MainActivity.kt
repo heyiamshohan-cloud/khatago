@@ -5,7 +5,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import com.shohan.khatago.ui.KhataGoApp
 
 /**
  * KhataGo hosts a single Compose activity; every screen is a destination in the
@@ -22,9 +21,7 @@ class MainActivity : FragmentActivity() {
         splashScreen.setKeepOnScreenCondition { false }
         enableEdgeToEdge()
 
+        // TEMPORARY (bisection): ui package moved to staging/
         val container = (application as KhataGoApplication).container
-        setContent {
-            KhataGoApp(container = container)
-        }
     }
 }
