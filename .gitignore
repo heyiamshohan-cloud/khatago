@@ -1,0 +1,35 @@
+# Gradle / build output
+.gradle/
+build/
+app/build/
+app/release/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+*.hprof
+
+# Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+.sessions/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Signing / secrets — never commit these
+*.jks
+*.keystore
+*.p12
+key.properties
+keystore.properties
+signing.properties
+*.gpg
+secrets.properties
+
+# Kotlin
+.kotlin/
