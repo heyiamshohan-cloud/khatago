@@ -29,10 +29,10 @@ Compose contracts working under R8.
 
 ## GitHub release
 
-The release workflow (`.github/workflows/release.yml`, parked at
-`workflows/release.yml` until the App has workflow permission) runs the unit
-tests, builds the signed release APK when the four `KHATAGO_*` secrets are
-present, and publishes a GitHub Release for a tag such as `v1.0.0`.
+The release workflow (`.github/workflows/release.yml`) runs on any `v*` tag: it
+runs the unit tests and lint, builds the release APK, signs it when the four
+`KHATAGO_*` secrets are present (otherwise it stays unsigned) and publishes a
+GitHub Release for the tag.
 
 Manual equivalent:
 
@@ -46,9 +46,9 @@ gh release create v1.0.0 app/build/outputs/apk/release/app-release.apk \
 
 ## Checklist
 
-- [ ] Version name and code match (`1.0.0` / `1`).
-- [ ] Unit tests pass.
-- [ ] Lint passes with no errors.
+- [x] Version name and code match (`1.0.0` / `1`).
+- [x] Unit tests pass (87 unit tests, CI run `34226566255`).
+- [x] Lint passes with no errors (CI run `34226566255`).
 - [ ] Release APK installs and opens on a device with Android 8.0 (API 26)+.
 - [ ] Fresh install shows onboarding, then setup, then an empty dashboard.
 - [ ] No network permission in the merged manifest (verify with

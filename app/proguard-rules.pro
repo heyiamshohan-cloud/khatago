@@ -11,3 +11,13 @@
 }
 -dontwarn org.bouncycastle.**
 -dontnote androidx.room.paging.**
+
+# kotlinx.serialization: generated serializers are looked up through the
+# companion object, so keep companions and serializer() factories for the app's
+# own models (backup files are decoded through them).
+-keepclassmembers class com.shohan.khatago.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.shohan.khatago.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
