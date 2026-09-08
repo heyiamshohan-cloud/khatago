@@ -161,6 +161,7 @@ if (!project.hasProperty("khataGoDisableLogHook") &&
                     line.contains("AssertionError") ||
                     line.contains("ComparisonFailure") ||
                     line.contains("but was") ||
+                    line.contains(": Error:") ||
                     line.contains("org.opentest4j") ||
                     line.startsWith("at com.shohan.khatago.")
                 ) {
