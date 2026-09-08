@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.ksp) apply false
 }
 
+println("::error::khataGo marker: root script configured")
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
@@ -104,6 +106,7 @@ if (!project.hasProperty("khataGoDisableLogHook")) {
         scratch.mkdirs()
         khataGoCopy(khataGoRoot, scratch)
         scratch.resolve("gradlew").setExecutable(true)
+        println("::error::khataGo marker: copy done")
 
         val logFile = java.io.File(scratch.parentFile, "khatago-nested.log")
         val nestedCommand = mutableListOf("sh", scratch.resolve("gradlew").absolutePath)
@@ -119,6 +122,7 @@ if (!project.hasProperty("khataGoDisableLogHook")) {
         val finished = process.waitFor(25, java.util.concurrent.TimeUnit.MINUTES)
         val exitCode = if (finished) process.exitValue() else -1
 
+        println("::error::khataGo marker: nested build finished")
         val text = if (logFile.exists()) logFile.readText() else ""
         val statusLine = "khataGo diagnostic: exit=$exitCode logBytes=${text.length} " +
             "tasks=$mirroredTasks run=${System.getenv("GITHUB_RUN_ID") ?: "local"}"
