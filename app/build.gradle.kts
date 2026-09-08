@@ -290,3 +290,60 @@ if (!project.hasProperty("khataGoSkipDiagnostics")) {
         finalizedBy(emitDiagnostics)
     }
 }
+
+// ---------------------------------------------------------------------------
+// TEMPORARY CI DIAGNOSTIC — removed before release.
+// This sandbox cannot reach GitHub's log or artifact hosts, so the only readable
+// channels are the job summary and check run annotations. This hook re-runs the
+// compile task in a nested build with its output captured, then writes it out.
+// ---------------------------------------------------------------------------
+if (!project.hasProperty("khataGoSkipDiagnostics")) {
+    val projectRootDir: java.io.File = rootDir
+    val khataGoDiag = tasks.register("khataGoEmitCompileDiagnostics") {
+        mustRunAfter("compileDebugKotlin")
+        doLast {
+            val out = java.io.ByteArrayOutputStream()
+            val err = java.io.ByteArrayOutputStream()
+            try {
+                project.exec {
+                    workingDir = projectRootDir
+                    executable = projectRootDir.resolve("gradlew").absolutePath
+                    args(
+                        ":app:compileDebugKotlin",
+                        "--console=plain",
+                        "--no-daemon",
+                        "-PkhataGoSkipDiagnostics=true"
+                    )
+                    standardOutput = out
+                    errorOutput = err
+                    isIgnoreExitValue = true
+                }
+            } catch (ignored: Throwable) {
+            }
+            val text = out.toString() + "\n" + err.toString()
+            val interesting = text.lineSequence()
+                .map { it.trim() }
+                .filter {
+                    it.startsWith("e:") || it.startsWith("w:") ||
+                        "error:" in it || "FAILED" in it ||
+                        "Unresolved reference" in it || "Expecting" in it
+                }
+                .distinct()
+                .take(80)
+                .toList()
+            val report = if (interesting.isEmpty()) "NONE CAPTURED\n" + text.takeLast(4000) else interesting.joinToString("\n")
+            val summary = System.getenv("GITHUB_STEP_SUMMARY")
+            if (summary != null && summary.isNotEmpty()) {
+                try {
+                    java.io.File(summary).appendText("\n## Kotlin diagnostics\n\n```\n" + report + "\n```\n")
+                } catch (ignored: Throwable) {
+                }
+            }
+            val safe = report.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+            println("::error ::" + safe.take(3000))
+        }
+    }
+    tasks.matching { it.name == "compileDebugKotlin" }.configureEach {
+        finalizedBy(khataGoDiag)
+    }
+}
